@@ -1,0 +1,25 @@
+/* Deep override for the home page header logo area */
+body #main-index .title h1 {
+    min-height: 160px !important; 
+    height: 160px !important;
+    max-height: 160px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Forces the square/circular Aurora image to stretch cleanly to size */
+body #main-index .title h1 img {
+    height: 160px !important;
+    width: auto !important;
+    max-height: 160px !important;
+    min-height: 160px !important;
+    object-fit: contain !important;
+}
+
+/* Adjust sizes on the search result output pages */
+#search_logo img {
+    height: 55px !important;
+    width: auto !important;
+}
+

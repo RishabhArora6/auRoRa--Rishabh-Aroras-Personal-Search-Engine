@@ -1,0 +1,1270 @@
+<head>
+<link rel="icon" type="image/png" href="/static/themes/simple/img/favicon.png?v=aurora2026">
+</head>
+<form id="search" method="{{ method }}" action="{{ url_for('search') }}" role="search">
+  <div id="search_header">
+
+    <!-- Aurora Logo -->
+    <a id="search_logo"
+       href="{{ url_for('index') }}"
+       tabindex="0"
+       title="{{ _('Display the front page') }}">
+
+      <img
+        src="{{ url_for('static', filename='img/favicon.png') }}"
+        alt="auRoRa"
+        class="aurora-result-logo">
+
+    </a>
+
+    <div id="search_view">
+
+      <div class="search_box">
+
+        <input
+          id="q"
+          name="q"
+          type="text"
+          placeholder="{{ _('Search for...') }}"
+          tabindex="1"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          autocorrect="off"
+          dir="auto"
+          value="{{ q or '' }}">
+
+        <button
+          id="clear_search"
+          type="reset"
+          aria-label="{{ _('clear') }}"
+          class="hide_if_nojs">
+
+          <span>{{ icon_big('close') }}</span>
+          <span class="show_if_nojs">{{ _('clear') }}</span>
+
+        </button>
+
+        <button
+          id="send_search"
+          type="submit"
+          {%- if search_on_category_select -%}
+          name="category_{{ selected_categories[0]|replace(' ', '_') }}"
+          {%- endif -%}
+          aria-label="{{ _('search') }}">
+
+          <span class="hide_if_nojs">
+            {{ icon_big('search') }}
+          </span>
+
+          <span class="show_if_nojs">
+            {{ _('search') }}
+          </span>
+
+        </button>
+
+        <div class="autocomplete hide_if_nojs">
+          <ul></ul>
+        </div>
+
+      </div>
+    </div>
+
+    {% set display_tooltip = true %}
+    {% include 'simple/categories.html' %}
+
+  </div>
+
+  <div class="search_filters">
+
+    {% include 'simple/filters/languages.html' %}
+    {% include 'simple/filters/time_range.html' %}
+    {% include 'simple/filters/safesearch.html' %}
+
+  </div>
+
+  <input type="hidden" name="theme" value="{{ theme }}">
+
+  {% if timeout_limit %}
+    <input
+      type="hidden"
+      name="timeout_limit"
+      value="{{ timeout_limit|e }}">
+  {% endif %}
+
+</form>
+
+
+{% if endpoint != 'index' %}
+
+<!-- =====================================================
+     AURORA RESULT PAGE THEME TOGGLE
+     ===================================================== -->
+
+<div class="aurora-result-theme-toggle"
+     aria-label="Theme switch">
+
+  <label class="aurora-switch">
+
+    <input
+      type="checkbox"
+      id="auroraResultThemeToggle"
+      aria-label="Switch between light and dark mode">
+
+    <span class="aurora-slider"></span>
+
+  </label>
+
+</div>
+
+
+<style>
+
+/* =====================================================
+   1. HIDE ABOUT + PREFERENCES
+   ===================================================== */
+
+#links_on_top,
+#links_on_top .link_on_top_about,
+#links_on_top .link_on_top_preferences {
+
+    display: none !important;
+    visibility: hidden !important;
+
+}
+
+
+/* =====================================================
+   AURORA — RESULT PAGE ICON
+   ===================================================== */
+
+
+#search_logo {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 70px !important;
+    min-width: 70px !important;
+
+    height: 70px !important;
+
+    /* IMPORTANT: move the logo visually to the left */
+    position: relative !important;
+    left: -35px !important;
+
+    margin-right: 0 !important;
+
+    text-decoration: none !important;
+}
+
+
+#search_logo .aurora-result-logo {
+    display: block !important;
+
+    width: 46px !important;
+    height: 46px !important;
+
+    object-fit: contain !important;
+    object-position: center !important;
+
+    border: none !important;
+}
+
+
+/* =====================================================
+   3. AURORA THEME TOGGLE
+   Same dimensions/style as homepage
+   ===================================================== */
+
+.aurora-result-theme-toggle {
+
+    position: fixed !important;
+
+    top: 25px !important;
+    right: 25px !important;
+
+    z-index: 999999 !important;
+
+}
+
+
+.aurora-switch {
+
+    position: relative !important;
+
+    display: inline-block !important;
+
+    width: 54px !important;
+    height: 28px !important;
+
+}
+
+
+.aurora-switch input {
+
+    opacity: 0 !important;
+
+    width: 0 !important;
+    height: 0 !important;
+
+}
+
+
+.aurora-slider {
+
+    position: absolute !important;
+
+    cursor: pointer !important;
+
+    inset: 0 !important;
+
+    background-color: #cbd5e1 !important;
+
+    transition: .3s !important;
+
+    border-radius: 34px !important;
+
+}
+
+
+.aurora-slider:before {
+
+    position: absolute !important;
+
+    content: "" !important;
+
+    height: 20px !important;
+    width: 20px !important;
+
+    left: 4px !important;
+    bottom: 4px !important;
+
+    background-color: white !important;
+
+    transition: .3s !important;
+
+    border-radius: 50% !important;
+
+    box-shadow:
+        0 2px 4px rgba(0,0,0,.1) !important;
+
+}
+
+
+.aurora-switch input:checked + .aurora-slider {
+
+    background-color: #00ff5e !important;
+
+}
+
+
+.aurora-switch input:checked + .aurora-slider:before {
+
+    transform: translateX(26px) !important;
+
+}
+
+
+/* =====================================================
+   4. AURORA DARK THEME — RESULT PAGE
+   ===================================================== */
+
+/* =====================================================
+   AURORA — COMPLETE DARK MODE
+   ===================================================== */
+
+/* ---------- PAGE BACKGROUND ---------- */
+
+html.aurora-dark,
+html.aurora-dark body,
+html.aurora-dark #main,
+html.aurora-dark #content,
+html.aurora-dark #main_results,
+html.aurora-dark #results,
+html.aurora-dark #main_search,
+html.aurora-dark #search_header,
+html.aurora-dark .search_filters {
+
+    background-color: #161616 !important;
+    color: #ffffff !important;
+
+}
+
+
+/* ---------- SEARCH AREA ---------- */
+
+html.aurora-dark #search_view .search_box {
+
+    background: #111827 !important;
+
+    border-color: #00ff5e !important;
+
+}
+
+
+html.aurora-dark #q {
+
+    color: #ffffff !important;
+
+    background: transparent !important;
+
+}
+
+
+html.aurora-dark #q::placeholder {
+
+    color: #b8b8b8 !important;
+
+}
+
+
+/* ---------- RESULT CARDS ---------- */
+
+html.aurora-dark article.result,
+html.aurora-dark .result,
+html.aurora-dark .result-default,
+html.aurora-dark .result-images,
+html.aurora-dark .result-videos,
+html.aurora-dark .result-news {
+
+    background-color: #161616 !important;
+
+    color: #ffffff !important;
+
+    border-color: #555555 !important;
+
+}
+
+
+/* ---------- RESULT CARD TEXT ---------- */
+
+html.aurora-dark .result,
+html.aurora-dark .result p,
+html.aurora-dark .result .content,
+html.aurora-dark .result .description,
+html.aurora-dark .result .metadata,
+html.aurora-dark .result .url,
+html.aurora-dark .result .engines,
+html.aurora-dark .result .result-content,
+html.aurora-dark .result .result-source {
+
+    color: #ffffff !important;
+
+}
+
+
+/* ---------- RESULT TITLES ---------- */
+
+html.aurora-dark .result h3,
+html.aurora-dark .result h3 a,
+html.aurora-dark .result h4,
+html.aurora-dark .result h4 a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* ---------- ALL RESULT LINKS ---------- */
+
+html.aurora-dark .result a {
+
+    color: #69b7ff !important;
+
+}
+
+
+html.aurora-dark .result a:hover {
+
+    color: #9bd2ff !important;
+
+}
+
+
+/* ---------- RESULT URL / SOURCE ---------- */
+
+html.aurora-dark .result .url {
+
+    color: #d0d0d0 !important;
+
+}
+
+
+/* ---------- DATE / SMALL TEXT ---------- */
+
+html.aurora-dark .result time,
+html.aurora-dark .result .published,
+html.aurora-dark .result .metadata {
+
+    color: #bdbdbd !important;
+
+}
+
+
+/* ---------- ENGINE NAMES ---------- */
+
+html.aurora-dark .engines,
+html.aurora-dark .engine {
+
+    color: #c8c8c8 !important;
+
+}
+
+
+/* ---------- CACHED LINK ---------- */
+
+html.aurora-dark .result .cache {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* ---------- FILTERS ---------- */
+
+html.aurora-dark .search_filters,
+html.aurora-dark .search_filters *,
+html.aurora-dark #search_filters {
+
+    background-color: #161616 !important;
+
+    color: #ffffff !important;
+
+}
+
+
+/* ---------- FILTER TEXT ---------- */
+
+html.aurora-dark .search_filters a,
+html.aurora-dark .search_filters label,
+html.aurora-dark .search_filters span {
+
+    color: #ffffff !important;
+
+}
+
+
+/* ---------- CATEGORY NAVIGATION ---------- */
+
+html.aurora-dark #categories,
+
+html.aurora-dark #categories a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* ---------- INFO PANEL ---------- */
+
+html.aurora-dark .infobox,
+html.aurora-dark #infobox,
+html.aurora-dark .panel {
+
+    background-color: #161616 !important;
+
+    color: #ffffff !important;
+
+    border-color: #555555 !important;
+
+}
+
+
+html.aurora-dark .infobox *,
+html.aurora-dark #infobox *,
+html.aurora-dark .panel * {
+
+    color: #ffffff !important;
+
+}
+
+
+html.aurora-dark .infobox a,
+html.aurora-dark #infobox a,
+html.aurora-dark .panel a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* ---------- RESPONSE TIME ---------- */
+
+html.aurora-dark .result_stats,
+html.aurora-dark #result_stats {
+
+    color: #ffffff !important;
+
+    border-color: #555555 !important;
+
+}
+
+
+/* ---------- HORIZONTAL LINES ---------- */
+
+html.aurora-dark hr,
+html.aurora-dark .result_separator {
+
+    border-color: #444444 !important;
+
+}
+
+
+/* ---------- GENERIC TEXT ---------- */
+
+html.aurora-dark #content p,
+html.aurora-dark #content span,
+html.aurora-dark #content label {
+
+    color: #ffffff;
+
+}
+
+
+/* ---------- GENERIC LINKS ---------- */
+
+html.aurora-dark #content a {
+
+    color: #69b7ff;
+
+}
+
+
+html.aurora-dark #content a:hover {
+
+    color: #9bd2ff;
+
+}
+
+
+/* ---------- REMOVE WHITE BACKGROUNDS ---------- */
+
+html.aurora-dark div,
+html.aurora-dark section,
+html.aurora-dark main {
+
+    border-color: #444444;
+
+}
+
+
+/* ---------- KEEP SEARCH BOX CORRECT ---------- */
+
+html.aurora-dark .search_box {
+
+    background-color: #111827 !important;
+
+}
+
+
+/* ---------- AURORA TOGGLE ---------- */
+
+html.aurora-dark .aurora-slider {
+
+    background-color: #00ff5e !important;
+
+}
+
+/* =====================================================
+   AURORA — FINAL DARK MODE TEXT FIX
+   ===================================================== */
+
+
+/* =====================================================
+   1. ALL CATEGORY NAMES — WHITE
+   ===================================================== */
+
+/* General, Images, Videos, News, Map, Music, It,
+   Science, Files, Social Media */
+
+html.aurora-dark #categories,
+html.aurora-dark #categories *,
+html.aurora-dark #categories a,
+html.aurora-dark #categories button,
+html.aurora-dark #categories span,
+html.aurora-dark .category {
+
+    color: #ffffff !important;
+
+}
+
+
+/* Category icons should also become white */
+
+html.aurora-dark #categories svg,
+html.aurora-dark #categories i,
+html.aurora-dark #categories .icon {
+
+    color: #ffffff !important;
+
+    fill: currentColor !important;
+
+}
+
+
+/* Active category */
+
+html.aurora-dark #categories .selected,
+html.aurora-dark #categories .active,
+html.aurora-dark #categories a.active {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =====================================================
+   2. RESULT WEBSITE DOMAINS — WHITE
+   ===================================================== */
+
+/* The text such as:
+   https://www.hellomagazine.com
+   https://www.msn.com
+   https://en.wikipedia.org
+*/
+
+html.aurora-dark .result_header,
+html.aurora-dark .result_header *,
+html.aurora-dark .result_header a,
+html.aurora-dark .result_header .url,
+html.aurora-dark .result_header .url a {
+
+    color: #ffffff !important;
+
+}
+
+
+/* URL itself */
+
+html.aurora-dark .url {
+
+    color: #ffffff !important;
+
+}
+
+
+/* URL links */
+
+html.aurora-dark .url a {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =====================================================
+   3. RESULT METADATA — WHITE / LIGHT GREY
+   ===================================================== */
+
+html.aurora-dark .result .metadata,
+html.aurora-dark .result .metadata *,
+html.aurora-dark .result .published,
+html.aurora-dark .result time {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =====================================================
+   4. RESULT DESCRIPTION — WHITE
+   ===================================================== */
+
+html.aurora-dark .result .content,
+html.aurora-dark .result .content *,
+html.aurora-dark .result .description,
+html.aurora-dark .result .description * {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =====================================================
+   5. ENGINE NAMES — WHITE
+   ===================================================== */
+
+html.aurora-dark .engines,
+html.aurora-dark .engines *,
+html.aurora-dark .engine,
+html.aurora-dark .engine a {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =====================================================
+   6. CACHED LINK — LIGHT BLUE
+   ===================================================== */
+
+html.aurora-dark .cache,
+html.aurora-dark .cache a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =====================================================
+   7. RESULT TITLES — LIGHT BLUE
+   ===================================================== */
+
+html.aurora-dark .result h3,
+html.aurora-dark .result h3 a,
+html.aurora-dark .result h4,
+html.aurora-dark .result h4 a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =====================================================
+   8. SEARCH FILTERS — WHITE
+   ===================================================== */
+
+html.aurora-dark .search_filters,
+html.aurora-dark .search_filters *,
+html.aurora-dark .search_filters a,
+html.aurora-dark .search_filters label,
+html.aurora-dark .search_filters span {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =====================================================
+   9. INFO PANEL — WHITE TEXT
+   ===================================================== */
+
+html.aurora-dark .infobox,
+html.aurora-dark .infobox *,
+html.aurora-dark #infobox,
+html.aurora-dark #infobox *,
+html.aurora-dark .panel,
+html.aurora-dark .panel * {
+
+    color: #ffffff !important;
+
+}
+
+
+/* Info panel links */
+
+html.aurora-dark .infobox a,
+html.aurora-dark #infobox a,
+html.aurora-dark .panel a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =====================================================
+   10. RESPONSE TIME — WHITE
+   ===================================================== */
+
+html.aurora-dark .result_stats,
+html.aurora-dark #result_stats,
+html.aurora-dark .result_stats * {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =====================================================
+   11. FILTER DROPDOWN ARROWS / ICONS
+   ===================================================== */
+
+html.aurora-dark .search_filters svg,
+html.aurora-dark .search_filters i {
+
+    color: #ffffff !important;
+
+    fill: currentColor !important;
+
+}
+
+
+/* =====================================================
+   12. TOP NAVIGATION BORDER
+   ===================================================== */
+
+html.aurora-dark #search_header,
+html.aurora-dark #categories,
+html.aurora-dark .search_filters {
+
+    border-color: #444444 !important;
+
+}
+
+
+/* =====================================================
+   5. LOGO
+   ===================================================== */
+
+html.aurora-dark #search_logo .aurora-result-logo {
+
+    filter: none !important;
+
+}
+
+/* =========================================================
+   auRoRa — FINAL DARK MODE OVERRIDES
+   ========================================================= */
+
+/* =========================================================
+   1. GLOBAL DARK PAGE
+   ========================================================= */
+
+html.aurora-dark,
+html.aurora-dark body {
+
+    background: #161616 !important;
+    color: #ffffff !important;
+
+}
+
+
+/* =========================================================
+   2. OVERRIDE SEARXNG DARK-THEME VARIABLES
+   This is the important part.
+   ========================================================= */
+
+html.aurora-dark {
+
+    /* Main text */
+    --color-base-font: #ffffff !important;
+
+    /* Search */
+    --color-search-font: #ffffff !important;
+
+    /* Categories */
+    --color-categories-item-font: #ffffff !important;
+    --color-categories-item-selected-font: #69b7ff !important;
+
+    /* Results */
+    --color-result-background: #161616 !important;
+    --color-result-border: #555555 !important;
+
+    /* Website/domain */
+    --color-result-url-font: #ffffff !important;
+
+    /* Result description */
+    --color-result-description-font: #ffffff !important;
+    --color-result-description-highlight-font: #ffffff !important;
+
+    /* Result titles */
+    --color-result-link-font: #69b7ff !important;
+    --color-result-link-font-highlight: #69b7ff !important;
+    --color-result-link-visited-font: #8fc9ff !important;
+
+    /* Date */
+    --color-result-publishdate-font: #ffffff !important;
+
+    /* Engine names */
+    --color-result-engines-font: #ffffff !important;
+
+    /* Search URL */
+    --color-result-search-url-font: #ffffff !important;
+    --color-result-search-url-border: #555555 !important;
+
+}
+
+
+/* =========================================================
+   3. CATEGORY BAR
+   ========================================================= */
+
+/* Every category */
+
+html.aurora-dark #categories .category,
+html.aurora-dark #categories .category_name,
+html.aurora-dark #categories .category_button {
+
+    color: #ffffff !important;
+
+}
+
+
+/* Category icons */
+
+html.aurora-dark #categories svg,
+html.aurora-dark #categories .ion-icon {
+
+    color: #ffffff !important;
+
+}
+
+
+/* Selected category */
+
+html.aurora-dark #categories .category_button.selected,
+html.aurora-dark #categories .category_button.selected .category_name,
+html.aurora-dark #categories .category_button.selected svg {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =========================================================
+   4. RESULT WEBSITE / DOMAIN
+   ========================================================= */
+
+/*
+   SearXNG actually uses:
+
+   <a class="url_header">
+       <div class="url_wrapper">
+           <span class="url_o1">
+               <span class="url_i1">...</span>
+           </span>
+       </div>
+   </a>
+*/
+
+html.aurora-dark #urls .result .url_header,
+html.aurora-dark #urls .result .url_header *,
+html.aurora-dark #urls .result .url_wrapper,
+html.aurora-dark #urls .result .url_wrapper *,
+html.aurora-dark #urls .result .url_o1,
+html.aurora-dark #urls .result .url_i1,
+html.aurora-dark #urls .result .url_o2,
+html.aurora-dark #urls .result .url_i2 {
+
+    color: #ffffff !important;
+
+}
+
+
+/* Make sure visited URL doesn't turn dark/purple */
+
+html.aurora-dark #urls .result .url_header:visited,
+html.aurora-dark #urls .result .url_header:visited * {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =========================================================
+   5. RESULT TITLE
+   ========================================================= */
+
+html.aurora-dark #urls .result h3,
+html.aurora-dark #urls .result h3 a {
+
+    color: #69b7ff !important;
+
+}
+
+
+html.aurora-dark #urls .result h3 a:visited {
+
+    color: #8fc9ff !important;
+
+}
+
+
+html.aurora-dark #urls .result h3 a:hover {
+
+    color: #9bd2ff !important;
+
+}
+
+
+/* =========================================================
+   6. RESULT DESCRIPTION
+   ========================================================= */
+
+html.aurora-dark #urls .result .content,
+html.aurora-dark #urls .result .content p,
+html.aurora-dark #urls .result p.content {
+
+    color: #ffffff !important;
+
+}
+
+
+/* Highlighted words */
+
+html.aurora-dark #urls .result .highlight {
+
+    color: #ffffff !important;
+    background: transparent !important;
+
+}
+
+
+/* =========================================================
+   7. RESULT DATE
+   ========================================================= */
+
+html.aurora-dark #urls .result .published_date,
+html.aurora-dark #urls .result .result_length,
+html.aurora-dark #urls .result .result_author,
+html.aurora-dark #urls .result .result_shipping,
+html.aurora-dark #urls .result .result_source_country {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =========================================================
+   8. ENGINE NAMES
+   ========================================================= */
+
+html.aurora-dark #urls .result .engines,
+html.aurora-dark #urls .result .engines span {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =========================================================
+   9. CACHED LINK
+   ========================================================= */
+
+html.aurora-dark #urls .result .cache_link,
+html.aurora-dark #urls .result .cache_link * {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =========================================================
+   10. INFO PANEL
+   ========================================================= */
+
+html.aurora-dark #sidebar,
+html.aurora-dark #sidebar *,
+html.aurora-dark .infobox,
+html.aurora-dark .infobox * {
+
+    color: #ffffff !important;
+
+}
+
+
+html.aurora-dark #sidebar a,
+html.aurora-dark .infobox a {
+
+    color: #69b7ff !important;
+
+}
+
+
+/* =========================================================
+   11. RESPONSE TIME / SIDEBAR
+   ========================================================= */
+
+html.aurora-dark #sidebar {
+
+    background: #161616 !important;
+
+}
+
+
+html.aurora-dark #sidebar .title,
+html.aurora-dark #sidebar .response_time,
+html.aurora-dark #sidebar .result_stats {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =========================================================
+   12. FILTERS
+   ========================================================= */
+
+html.aurora-dark .search_filters,
+html.aurora-dark .search_filters *,
+html.aurora-dark .search_filters a,
+html.aurora-dark .search_filters label {
+
+    color: #ffffff !important;
+
+}
+
+
+/* =========================================================
+   13. RESULT CARDS
+   ========================================================= */
+
+html.aurora-dark #urls article.result {
+
+    background: #161616 !important;
+
+    color: #ffffff !important;
+
+    border-color: #555555 !important;
+
+}
+
+
+/* =========================================================
+   14. REMOVE REMAINING DARK/BLACK TEXT
+   ========================================================= */
+
+html.aurora-dark #urls article.result .url_wrapper,
+html.aurora-dark #urls article.result .published_date,
+html.aurora-dark #urls article.result .content,
+html.aurora-dark #urls article.result .engines {
+
+    text-shadow: none !important;
+
+}
+
+
+/* =========================================================
+   15. DARK MODE SEARCH AREA
+   ========================================================= */
+
+html.aurora-dark #search_header,
+html.aurora-dark #search_view,
+html.aurora-dark .search_filters {
+
+    background: #161616 !important;
+
+}
+
+
+html.aurora-dark #search_view .search_box {
+
+    background: #111827 !important;
+
+    border-color: #00ff5e !important;
+
+}
+
+
+html.aurora-dark #q {
+
+    color: #ffffff !important;
+
+}
+
+
+html.aurora-dark #q::placeholder {
+
+    color: #aaaaaa !important;
+
+}
+
+</style>
+
+
+<script>
+
+(function () {
+
+    /*
+     * Read the same theme setting
+     * used by the Aurora homepage.
+     */
+
+    function applyAuroraResultTheme() {
+
+        var toggle =
+            document.getElementById(
+                'auroraResultThemeToggle'
+            );
+
+        var dark =
+            localStorage.getItem(
+                'aurora-theme'
+            ) === 'dark';
+
+
+        document.documentElement.classList.toggle(
+            'aurora-dark',
+            dark
+        );
+
+
+        if (toggle) {
+
+            toggle.checked = dark;
+
+        }
+
+    }
+
+
+    /*
+     * Apply theme immediately.
+     */
+
+    applyAuroraResultTheme();
+
+
+    /*
+     * Connect toggle after page loads.
+     */
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            var toggle =
+                document.getElementById(
+                    'auroraResultThemeToggle'
+                );
+
+
+            if (!toggle) {
+
+                return;
+
+            }
+
+
+            applyAuroraResultTheme();
+
+
+            toggle.addEventListener(
+                'change',
+                function () {
+
+                    var dark =
+                        this.checked;
+
+
+                    document.documentElement.classList.toggle(
+                        'aurora-dark',
+                        dark
+                    );
+
+
+                    localStorage.setItem(
+                        'aurora-theme',
+                        dark
+                            ? 'dark'
+                            : 'light'
+                    );
+
+                }
+            );
+
+        }
+    );
+
+})();
+
+</script>
+
+<script>
+document.title = "auRoRa - Rishabh Arora's Personal Search Engine";
+</script>
+
+{% endif %}

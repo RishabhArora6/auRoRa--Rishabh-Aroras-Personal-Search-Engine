@@ -1,0 +1,764 @@
+{% extends "simple/base.html" %}
+{% block title %}auRoRa - Rishabh Arora's Personal Search Engine{% endblock %}
+{% block head %}
+
+
+
+<!-- High Priority Global UI Layout Overrides -->
+
+<style>
+    /* 1. Root Variables */
+    :root {
+        --aurora-light-bg: #f2f5f8 !important;
+        --aurora-dark-bg: #161616 !important;
+        --aurora-green-primary: #00ff5e !important;
+        --aurora-green-dark: #00ff00 !important;
+    }
+
+    /* 2. Absolute Theme Override for the Entire Window */
+    html, body, #pages, #package_index {
+        background: var(--aurora-light-bg) !important;
+        background-color: var(--aurora-light-bg) !important;
+        transition: background-color 0.25s ease, color 0.25s ease !important;
+    }
+
+    /* Dark Mode State handling everything */
+    html.aurora-dark, html.aurora-dark body, html.aurora-dark #pages, html.aurora-dark #package_index {
+        background: var(--aurora-dark-bg) !important;
+        background-color: var(--aurora-dark-bg) !important;
+    }
+
+    /* 3. Force Center Alignment & Top Positioning */
+    #package_index {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        min-height: 100vh !important;
+        padding-top: 60px !important;
+    }
+
+    /* 4. Hyper-Scaled Top Logo and Dynamic Mode Swap */
+    .title h1 {
+        min-height: 220px !important;
+        height: 220px !important;
+        max-height: 220px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 0 30px 0 !important;
+    }
+    .title h1 img {
+        height: 220px !important;
+        width: 220px !important;
+        object-fit: contain !important;
+    }
+
+    .logo-light { display: block !important; }
+    .logo-dark  { display: none !important; }
+
+    html.aurora-dark .logo-light { display: none !important; }
+    html.aurora-dark .logo-dark  { display: block !important; }
+
+    /* 5. Clean Integration of the Search Bar Element Container */
+    #search {
+        width: 100% !important;
+        max-width: 650px !important;
+        margin: 0 auto !important;
+        padding: 0 20px !important;
+        float: none !important; 
+    }
+
+    /* FIX: Force the outer container to use flex layout and center its items */
+    #search_form {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important; /* Horizontally centers the search bar inside the box */
+        border: 2px solid var(--aurora-green-primary) !important;
+        border-radius: 9999px !important;
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+        padding: 10px 20px !important; 
+        margin: 0 auto !important;
+        width: 100% !important;
+        height: 70px !important; /* Gives breathing room to keep the capsule centered nicely */
+    }
+
+    html.aurora-dark #search_form {
+        background: #003096 !important;
+        background-color: #003096 !important;
+        border-color: var(--aurora-green-dark) !important;
+    }
+
+    /* KEEP & BALANCED CENTERING FOR THE INNER CAPSULE SEARCH BOX */
+    .search_box {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        border: 2px solid var(--aurora-green-primary) !important;
+        border-radius: 9999px !important;
+        
+        /* Retain the stylized inner capsule look */
+        background: #003096 !important;
+        background-color: #003096 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        
+        padding: 0 20px !important; 
+        margin: 0 auto !important; /* Perfect middle snap alignment */
+        width: 100% !important;
+        max-width: 500px !important;
+        height: 46px !important;
+        float: none !important;
+    }
+
+    /* Keep capsule borders clean in dark mode */
+    html.aurora-dark .search_box {
+        border-color: var(--aurora-green-dark) !important;
+    }
+
+    /* Style inner text fields inside the capsule */
+    #q, .search_box input[type="text"] {
+        text-align: left !important;
+        padding: 0 10px !important;
+        margin: 0 !important;
+        width: 100% !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color: #ffffff !important; /* Keeps typed text white inside dark capsule */
+    }
+
+    /* Placeholder text color inside capsule */
+    .search_box input[type="text"]::placeholder, #q::placeholder {
+        color: var(--aurora-green-primary) !important;
+        opacity: 0.7 !important;
+    }
+
+    /* Action icon buttons layout alignment fix */
+    .search_box button[type="submit"], button#send_search {
+        background: transparent !important;
+        color: var(--aurora-green-primary) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* 6. Dynamic Text Overrides for Filter Dropdowns (Auto-detect, Anytime, etc.) */
+    .search_filters {
+        margin-top: 15px !important;
+        display: flex !important;
+        justify-content: center !important;
+        gap: 15px !important;
+    }
+    html.aurora-dark .search_filters select,
+    html.aurora-dark .search_filters .select-wrapper,
+    html.aurora-dark .search_filters label,
+    html.aurora-dark #search_view .search_filters a,
+    html.aurora-dark div[class*="filter"] {
+        color: #ffffff !important;
+    }
+
+    /* 7. Comprehensive Purge of Unwanted Elements */
+    #search_logo,
+    a#search_logo,
+    .search_box #search_logo,
+    #search_form #search_logo,
+    a.logo,
+    .search_box a.logo,
+    #main-index a.logo,
+    div.logo,
+    .search_box .logo,
+    #search_form .logo,
+    nav[role="navigation"],
+    #header_nav,
+    .header_nav,
+    #header_lead,
+    .search_categories,
+    footer,
+    a[href*="about"],
+    a[href*="preferences"],
+    .preferences_back,
+    #main-index .tabs,
+    li.nav-item
+    {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* 8. Custom Fixed Theme Slide Toggle */
+    .theme-toggle-container {
+        position: fixed !important;
+        top: 25px !important;
+        right: 25px !important;
+        z-index: 99999 !important;
+    }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 54px;
+        height: 28px;
+    }
+    .switch input { 
+        opacity: 0; width: 0; height: 0;
+    }
+    .slider {
+        position: absolute; cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #cbd5e1;
+        transition: .3s;
+        border-radius: 34px;
+    }
+    .slider:before {
+        position: absolute; content: "";
+        height: 20px; width: 20px;
+        left: 4px; bottom: 4px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input:checked + .slider {
+        background-color: var(--aurora-green-primary);
+    }
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+</style>
+
+<!-- High Priority Class Execution Script -->
+<script>
+    (function() {
+        const theme = localStorage.getItem("aurora-theme");
+        if (theme === "dark") {
+            document.documentElement.classList.add("aurora-dark");
+        }
+    })();
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggle = document.getElementById("auroraThemeToggle");
+        if (localStorage.getItem("aurora-theme") === "dark") {
+            toggle.checked = true;
+        }
+        toggle.addEventListener("change", function() {
+            if (this.checked) {
+                document.documentElement.classList.add("aurora-dark");
+                localStorage.setItem("aurora-theme", "dark");
+            } else {
+                document.documentElement.classList.remove("aurora-dark");
+                localStorage.setItem("aurora-theme", "light");
+            }
+        });
+    });
+</script>
+<style>
+/* Pushes the dropdown panel below the white containment bounds */
+.autocomplete {
+    position: absolute !important;
+    top: 100% !important;   /* Locks directly below the search container bottom edge */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important; /* Forces layout rendering above page data background elements */
+    margin-top: 6px !important;
+    background-color: #161616 !important; /* aurora-dark-bg */
+    border: 1px solid #32b964 !important;    /* aurora-green-dark perimeter wrap */
+    border-radius: 6px !important;
+}
+.autocomplete .suggest-item {
+    color: #00ff5e !important; /* aurora-green-primary typing visibility */
+    padding: 0.8rem 1rem !important;
+}
+.autocomplete .suggest-item:hover, 
+.autocomplete .suggest-item.selected {
+    background-color: #32b964 !important; /* Highlight context color tracking */
+    color: #161616 !important;
+}
+
+/* ============================================================
+   AUTOCOMPLETE — EXACTLY MATCH SEARCH BOX WIDTH
+   ============================================================ */
+
+/* Make the actual search box the positioning anchor */
+#search .search_box {
+    position: relative !important;
+}
+
+/* Autocomplete */
+#search .search_box .autocomplete {
+    position: absolute !important;
+
+    /* EXACT same width as the search box */
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+
+    /* Align perfectly with search box */
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+
+    /* 8px gap below the pill */
+    top: calc(100% + 8px) !important;
+
+    margin: 0 !important;
+
+    background: #fa1bb4 !important;
+    border: 1px solid #32b964 !important;
+    border-radius: 14px !important;
+
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75) !important;
+
+    padding: 0.6rem 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+
+    z-index: 99999 !important;
+}
+
+/* Suggestion text */
+#search .search_box .autocomplete *,
+#search .search_box .autocomplete .suggest-item,
+#search .search_box .autocomplete .suggest-item span,
+#search .search_box .autocomplete .suggest-item div {
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    text-align: left !important;
+    background: transparent !important;
+}
+
+/* Hover / selected suggestion */
+#search .search_box .autocomplete .suggest-item.selected,
+#search .search_box .autocomplete .suggest-item:hover {
+    background-color: #32b964 !important;
+}
+
+#search .search_box .autocomplete .suggest-item.selected *,
+#search .search_box .autocomplete .suggest-item:hover * {
+    color: #161616 !important;
+}
+
+/* ==========================================================================
+   SearXNG Master UI Overrides (True Core Dead-Centering & Floating UI)
+   ========================================================================== */
+
+/* 1. DESTRUCT NATIVE GRID CONTAINERS & RE-BUILD ABSOLUTE COLUMN BALANCING */
+html, body, #main_index, .wrapper, #content, #search_view, .search_container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; /* Force layouts strictly to absolute horizontal screen center */
+    justify-content: flex-start !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    float: none !important;
+    position: static !important;
+}
+
+/* 2. RE-ESTABLISH COHESIVE LOGO HEADER & FORM TARGET SPACING */
+#header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+}
+
+#search {
+    display: block !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    float: none !important;
+    position: relative !important; /* Creates perfect layout base grid for the capsule wrapper */
+}
+
+#search_form {
+    display: block !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    position: relative !important; /* Creates clear relative tracking origin points for absolute overlays */
+}
+
+/* 3. SOLID FIXED MEASUREMENT PILL CAPSULE LAYER FOR THE SEARCH BOX */
+#search_form .search_box {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 650px !important; /* Hard locks pixel bounds across desktop displays */
+    max-width: 650px !important;
+    min-width: 650px !important; 
+    height: 3.6rem !important;
+    border-radius: 2rem !important; /* Perfect smooth rounded search pill profile shape */
+    background-color: #111b21 !important; /* Premium deep dark signature accent theme color */
+    border: 2px solid #00ff5e !important; /* aurora-green-primary neon neon outer glow line */
+    padding: 0 1.2rem !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important; /* Guarantees centering balance calculations stay locked */
+}
+
+/* Clean typed query text layout boundaries inside the input text row line */
+#search_form input[type="text"] {
+    flex-grow: 1 !important;
+    color: #ffffff !important; /* High contrast active reading text value */
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 1.15rem !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 4. POSITION THE FILTER OPTION PACK WIDGETS DIRECTLY UNDER THE CAPSULE CENTER */
+#categories, 
+.preferences_box,
+#search .input-group,
+#search_view form + div {
+    display: flex !important;
+    justify-content: center !important; /* Perfectly balances horizontal options rows */
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 1.5rem auto 0 auto !important; 
+    clear: both !important;
+    float: none !important;
+}
+
+/* 5. NUKE RAW SQUARES, INPUT-CLEARS, AND WEB LOG HOLES ('X') */
+#search_form button[type="reset"],
+#search_form .btn-clear,
+#search_form #clear_search,
+#search_form .search_box .input-clear,
+#search_form .search_box .btn-close {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#search_form button#send_search {
+    background: transparent !important;
+    border: none !important;
+    color: #00ff5e !important; /* aurora-green-primary submitting search loupe glass color profile */
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 6. SMART RELATIVE OVERLAY ANCHOR FOR DYNAMIC SUGGESTIONS FLOATING DRAWER */
+body .autocomplete {
+    position: absolute !important;
+    /* Anchors dropdown element mathematically right against the base footprint of the search form */
+    top: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important; /* Perfect pixel-by-pixel horizontal mirroring layout centering */
+    margin: 10px 0 0 0 !important; /* Creates smooth micro pixel distance space gaps under the capsule input */
+    max-width: 650px !important;
+    width: 650px !important; /* Matches search capsule width metrics 1:1 precisely */
+    background: #161616 !important; /* aurora-dark-bg core base back layer color */
+    border: 1px solid #32b964 !important; /* aurora-green-dark framing contour border lines */
+    border-radius: 14px !important; /* Smooth rounded curve profile style radius corners */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8) !important; /* Immersive dark theme floating dropshadow drop depths */
+    padding: 0.6rem 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    z-index: 999999 !important; /* Bypasses all hidden template asset layers layout sorting */
+}
+
+/* FORCE HIGH CONTRAST CLEAR TEXT READ STRINGS TO ALL AUTOCOMPLETE ENTRIES */
+body .autocomplete *,
+body .autocomplete .suggest-item,
+body .autocomplete .suggest-item span,
+body .autocomplete .suggest-item div {
+    color: #ffffff !important; /* Complete crisp white verification tracking priority check */
+    font-size: 1.05rem !important;
+    text-align: left !important;
+    background: transparent !important;
+}
+
+/* Row animations tracker adjustments applied cleanly during target cursor pointer hovers */
+body .autocomplete .suggest-item.selected,
+body .autocomplete .suggest-item:hover {
+    background-color: #32b964 !important; /* aurora-green-dark active context tracker row box background overlay */
+}
+body .autocomplete .suggest-item.selected *,
+body .autocomplete .suggest-item:hover * {
+    color: #161616 !important; /* Swaps typography data context text black for premium visibility */
+}
+
+
+/* ==========================================================================
+   SearXNG Master UI Overrides (Aurora Dark Compact Centering Fix)
+   ========================================================================== */
+
+/* 1. RESTORE THE COMPACT COLUMN LAYOUT AND REMOVE HORIZONTAL SCROLLING */
+html, body {
+    overflow-x: hidden !important; /* Eliminates the bottom scrollbar entirely */
+}
+
+/* Forces the main container to center everything directly on your screen size */
+.search_container,
+#search_view,
+#main_index {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important; 
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    float: none !important;
+}
+
+#search {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important; /* Centers the inner container perfectly */
+    padding: 0 !important;
+    float: none !important;
+}
+
+#search_form {
+    display: block !important;
+    width: 650px !important; /* Preserves your preferred compact size */
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    position: center !important; /* Anchor point for the suggestions dropdown */
+}
+
+/* 2. CAPSULE CONTOUR LAYOUT FOR THE SEARCH PILL BAR */
+#search_form .search_box {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 650px !important; 
+    max-width: 650px !important;
+    min-width: 650px !important; 
+    height: 3.5rem !important;
+    border-radius: 2rem !important; /* Sleek rounded search pill profile shape */
+    background-color: #111b21 !important; /* Deep dark palette base accent */
+    border: 2px solid #00ff5e !important; /* aurora-green-primary glowing outline border */
+    padding: 0 1.2rem !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+}
+
+/* Ensure query typing fonts maintain bright high-contrast values inside input fields */
+#search_form input[type="text"] {
+    flex-grow: 1 !important;
+    color: #ffffff !important; 
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 1.15rem !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 3. CENTER SEARCH OPTIONS WIDGET MENUS DIRECTLY UNDERNEATH CAPSULE PILL */
+#categories, 
+.preferences_box,
+#search_view form + div,
+#search .input-group {
+    display: flex !important;
+    justify-content: center !important; /* Aligns options evenly inline horizontally */
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 1.5rem auto 0 auto !important; 
+    clear: both !important;
+}
+
+/* 4. TOTAL SUPPRESSION CONTROLS FOR HIDDEN CODES & INNER SQUARES LOG ('X') */
+#search_form button[type="reset"],
+#search_form .btn-clear,
+#search_form #clear_search,
+#search_form .search_box .input-clear,
+#search_form .search_box .btn-close {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#search_form button#send_search {
+    background: transparent !important;
+    border: none !important;
+    color: #00ff5e !important; /* aurora-green-primary query submission submit tint */
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 5. PERFECT FLOATING SUGGESTIONS DROPDOWN ANCHOR (CENTERED & FLUSH) */
+body .autocomplete {
+    position: absolute !important;
+    /* Anchoring to #search_form context locks it perfectly right under the capsule layout */
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important; /* Erases old script offset coordinates bugs */
+    max-width: 650px !important;
+    width: 650px !important; /* Matches search capsule width metrics 1:1 precisely */
+    margin: 10px auto 0 auto !important; /* Creates smooth micro pixel distance space gaps under the capsule input */
+    background: #161616 !important; /* aurora-dark-bg core base styling panel background layer */
+    border: 1px solid #32b964 !important; /* aurora-green-dark perimeter wrap borders */
+    border-radius: 14px !important; /* Modern soft sleek rounded curve corner profile style radius */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75) !important; /* Rich immersive dark theme floating dropshadow drop depths */
+    padding: 0.6rem 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    z-index: 999999 !important; /* Bypasses all hidden template asset layers layout sorting */
+}
+
+/* FORCE HIGH CONTRAST CLEAR TEXT READ STRINGS TO ALL AUTOCOMPLETE ENTRIES */
+body .autocomplete *,
+body .autocomplete .suggest-item,
+body .autocomplete .suggest-item span,
+body .autocomplete .suggest-item div {
+    color: #ffffff !important; /* High contrast permanent white label overrides visibility check */
+    font-size: 1.05rem !important;
+    text-align: left !important;
+    background: transparent !important;
+}
+
+/* Row animations tracker adjustments applied cleanly during target cursor pointer hovers */
+body .autocomplete .suggest-item.selected,
+body .autocomplete .suggest-item:hover {
+    background-color: #32b964 !important; /* aurora-green-dark active context tracker row box background overlay */
+}
+body .autocomplete .suggest-item.selected *,
+body .autocomplete .suggest-item:hover * {
+    color: #161616 !important; /* Swaps dropdown text to high readability contrast black while row focus highlights activate */
+}
+/* FINAL AURORA SEARCH BOX CENTERING FIX */
+#search_form {
+    position: relative !important;
+    width: 650px !important;
+    max-width: 650px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+#search_form .search_box {
+    position: relative !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    float: none !important;
+}
+/* =========================================================
+   auRoRa — FINAL SEARCH BOX CENTER FIX
+   ========================================================= */
+
+#search {
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    float: none !important;
+}
+
+#search_header {
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: block !important;
+}
+
+#search_view {
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+#search_view .search_box {
+    width: 500px !important;
+    max-width: 500px !important;
+    min-width: 500px !important;
+
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    float: none !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+
+    box-sizing: border-box !important;
+}
+/* Increase white search area height */
+#search {
+    min-height: 110px !important;
+}
+
+#search_header {
+    min-height: 110px !important;
+}
+
+#search_view {
+    min-height: 110px !important;
+    align-items: center !important;
+}
+</style>
+
+{% endblock %}
+
+{% block content %}
+<!-- Custom Slider Anchor -->
+<div class="theme-toggle-container">
+    <label class="switch">
+        <input type="checkbox" id="auroraThemeToggle">
+        <span class="slider"></span>
+    </label>
+</div>
+
+<div class="title">
+    <h1>
+        <img class="logo-light" src="{{ url_for('static', filename='themes/simple/img/searxng.png') }}" alt="Aurora Search" />
+        <img class="logo-dark" src="{{ url_for('static', filename='themes/simple/img/searxng_dark.png') }}" alt="Aurora Search" />
+    </h1>
+</div>
+
+
+
+
+{% include 'simple/search.html' %}
+{% endblock %}

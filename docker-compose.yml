@@ -1,0 +1,31 @@
+services:
+  searxng:
+    container_name: searxng
+    image: searxng/searxng:latest
+    restart: unless-stopped
+    volumes:
+      - ./searxng:/etc/searxng
+      # Map both light and dark logo graphics cleanly into the theme directory
+      - ./custom-logo.png:/usr/local/searxng/searx/static/themes/simple/img/searxng.png:ro
+      - ./custom-logo-dark.png:/usr/local/searxng/searx/static/themes/simple/img/searxng_dark.png:ro
+      - ./custom-logo.svg:/usr/local/searxng/searx/static/themes/simple/img/searxng.svg:ro
+      # Force overwrite template layout view
+      - ./searxng/templates/simple/index.html:/usr/local/searxng/searx/templates/simple/index.html:ro
+      - ./searxng/templates/simple/search.html:/usr/local/searxng/searx/templates/simple/search.html:ro
+      # Aurora favicon
+      - ./custom-logo-favicon.png:/usr/local/searxng/searx/static/themes/simple/img/favicon.png:ro
+      - ./custom-logo-favicon.svg:/usr/local/searxng/searx/static/themes/simple/img/favicon.svg:ro
+      - ./custom-logo-favicon.png:/usr/local/searxng/searx/static/img/favicon.png:ro
+      - ./custom-logo-favicon.svg:/usr/local/searxng/searx/static/img/favicon.svg:ro
+
+    environment:
+      - BASE_URL=https://aurora.rishabharora.co.in/
+      - INSTANCE_NAME=" "
+    ports:
+      - "8080:8080"
+    networks:
+      - searxng-net
+
+networks:
+  searxng-net:
+    driver: bridge
